@@ -1,0 +1,138 @@
+name: Terraform run
+
+on:
+  push:
+    branches:
+      - 'master'
+  pull_request:
+    branches:
+      - 'master'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 2
+
+      - name: List modules repo content
+        run: ls modules
+
+      # - name: Get changed files
+      #   uses: jitterbit/get-changed-files@v1
+      #   continue-on-error: true
+      #   id: get_changed
+      #   with:
+      #     format: csv
+      #     token: ${{ secrets.GITHUB_TOKEN }}
+      #     ignore: "**/+(.github)"
+      #     foldersOnly: true
+
+      - name: Set current directory
+        id: set_current_dir
+        run: echo "action_state=$(pwd)" >> "$GITHUB_ENV"
+
+      - name: Print current directory
+        id: print_current_dir
+        run: echo "${{ env.action_state }}"
+
+      # - name: Find environment of terraform code change (root folder of the repo)
+      #   id: find_env
+      #   run: |
+      #     INPUT="${{ steps.get_changed.outputs.added_modified }}"
+      #     paths=$(echo "$INPUT" | tr "," "\n")
+
+      #     repo_env=""
+
+      #     for path in $paths; do
+      #       if [[ "$path" =~ (vet|workflow|gitignore|.md|CODEOWNERS) ]]; then
+      #         echo "Skipping path: $path"
+      #         continue
+      #       fi
+
+      #       IFS='/' read -ra path_parts <<< "$path"
+      #       env_folder="${path_parts[0]}"
+      #       if [[ -z "$repo_env" ]]; then
+      #         repo_env="$env_folder"
+      #       else
+      #         if [[ "$env_folder" != "$repo_env" ]]; then
+      #           echo "Error: Change contains multiple environement folders at the root level."
+      #           exit 1
+      #         fi
+      #       fi
+      #     done
+
+      #     echo "Changes detected in environment: $repo_env"
+      #     echo "repo_env=${repo_env}" >> "$GITHUB_ENV"
+
+      - name: Terraform init,validate,plan
+        run: |
+          INPUT=${{ steps.get_changed.outputs.added_modified }}
+          paths=$(echo $INPUT | tr "," "\n")
+          for path in $paths; do
+            if [[ "$path" =~ (vet|workflow|gitignore|.md) ]]; then
+              echo "Skipping path: $path"
+              continue
+            fi
+
+            if [[ "$path" == *"schemas"* || "$path" == *"scripts"* || "$path" == *"files"* ]]; then
+              echo "Skipping path: $path (Other files directory, doesn't require terraform to run here)"
+              continue
+            fi
+            
+            directory=$(dirname "$path")
+            echo "Processing path: $path in directory: $directory"
+
+            cd ${{ env.action_state }}
+            cd "$directory"
+
+            if [ -f "test.tfplan" ]; then
+                echo "File test.tfplan already exists"
+            else
+                echo "Running terraform init"
+                terraform init > tf_init.txt
+
+                echo "Running terraform validate"
+                terraform validate > tf_validate.txt
+
+                echo "Running terraform plan"
+                terraform plan --var-file=<(cat *.tfvars) -out test.tfplan
+
+            fi
+          done
+
+      - name: Terraform Apply
+        if: |
+          github.ref == 'refs/heads/main'
+        run: |
+          export REDISCLOUD_SUBSCRIPTION_TIMEOUT=60
+          INPUT=${{ steps.get_changed.outputs.added_modified }}
+          paths=$(echo $INPUT | tr "," "\n")
+          for path in $paths
+          do
+            if [[ "$path" =~ (vet|workflow|gitignore|.md) ]]; then
+              echo "Skipping path: $path"
+              continue
+            fi
+
+            if [[ "$path" == *"schemas"* || "$path" == *"scripts"* ]]; then
+              echo "Skipping path: $path (Schema folder: Doesn't require terraform)"
+              continue
+            fi
+            
+            directory=$(dirname "$path")
+            echo "Processing path: $path in directory: $directory"
+
+            cd ${{ env.action_state }}
+            cd "$directory"
+
+            if [ -f "test.tfplan" ]; then
+              echo "Running terraform apply"
+              terraform apply -auto-approve test.tfplan
+              rm -f test.tfplan
+            else
+              echo "No test.tfplan found, skipping apply"
+            fi
+          done
