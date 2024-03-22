@@ -1,4 +1,4 @@
-//dummy
+
 resource "azurerm_resource_group" "rg" {
   name     = "rg-personal-001"
   location = "South India"
