@@ -22,3 +22,11 @@ jobs:
         run: |
           pwd > something.txt
           cat something.txt
+
+      - name: Terraform install
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform init
+        run: |
+          terraform init
+          
