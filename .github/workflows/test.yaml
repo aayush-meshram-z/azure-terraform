@@ -1,13 +1,13 @@
 name: Terraform run
 
-on: [push]
-  # push:
-  #   branches:
-  #     - 'master'
-  # pull_request:
-  #   branches:
-  #     - 'master'
-  # workflow_dispatch:
+on: 
+  push:
+    branches:
+      - 'main'
+  pull_request:
+    branches:
+      - 'main'
+  workflow_dispatch:
 
 permissions:
       id-token: write
@@ -52,4 +52,9 @@ jobs:
       - name: Terraform Plan
         run: |
           terraform plan -out "tfplan"
-          
+
+      - name: Terraform Apply
+        if: |
+          github.ref == 'refs/heads/main' 
+        run: |
+          terraform apply "tfplan"
