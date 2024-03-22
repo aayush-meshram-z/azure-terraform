@@ -41,9 +41,9 @@ jobs:
         id: set_current_dir
         run: |
           pwd > something.txt
-          cat something.txt
-          az account show > another.txt
-          cat another.txt
+          # cat something.txt
+          # az account show > another.txt
+          # cat another.txt
 
       - name: Terraform init
         run: |
