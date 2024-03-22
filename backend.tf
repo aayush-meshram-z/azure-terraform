@@ -1,3 +1,8 @@
+resource "github_actions_secret" "example_secret" {
+  repository       = "azure-terraform"
+  secret_name      = "AZURE_CLIENT_SECRET_VALUE"
+}
+
 terraform {
   backend "azurerm" {
     subscription_id = "b3c81c82-8ece-4492-ac8a-a32c95f8bfdf"
