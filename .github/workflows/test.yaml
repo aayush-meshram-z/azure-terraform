@@ -1,13 +1,13 @@
 name: Terraform run
 
-on:
-  push:
-    branches:
-      - 'master'
-  pull_request:
-    branches:
-      - 'master'
-  workflow_dispatch:
+on: [push]
+  # push:
+  #   branches:
+  #     - 'master'
+  # pull_request:
+  #   branches:
+  #     - 'master'
+  # workflow_dispatch:
 
 permissions:
       id-token: write
@@ -19,12 +19,6 @@ jobs:
       - uses: actions/checkout@v2
         with:
           fetch-depth: 2
-          
-      - name: Print PWD
-        id: set_current_dir
-        run: |
-          pwd > something.txt
-          cat something.txt
 
       - name: Azure login
         uses: azure/login@v2
@@ -34,7 +28,15 @@ jobs:
       - name: Terraform install
         uses: hashicorp/setup-terraform@v3
 
-      - name: Terraform init
+      - name: Print PWD
+        id: set_current_dir
         run: |
-          terraform init
+          pwd > something.txt
+          cat something.txt
+          az account show > another.txt
+          cat another.txt
+
+      # - name: Terraform init
+      #   run: |
+      #     terraform init
           
