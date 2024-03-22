@@ -12,6 +12,15 @@ on: [push]
 permissions:
       id-token: write
       contents: read  
+env:
+  ARM_CLIENT_ID: "${{ secrets.AZURE_CLIENT_ID }}"
+  ARM_TENANT_ID: "${{ secrets.AZURE_TENANT_ID }}"
+  ARM_CLIENT_SECRET: "${{ secrets.AZURE_CLIENT_SECRET_VALUE }}"
+  ARM_SUBSCRIPTION_ID: "b3c81c82-8ece-4492-ac8a-a32c95f8bfdf"
+  TF_VAR_TFSTATE_RESOURCE_GROUP_NAME: "${{ secrets.TFSTATE_RESOURCE_GROUP_NAME }}"
+  TF_VAR_TFSTATE_STORAGE_ACCOUNT_NAME: "${{ secrets.TFSTATE_STORAGE_ACCOUNT_NAME }}"
+  TF_VAR_TFSTATE_STORAGE_ACCOUNT_KEY: "${{ secrets.TFSTATE_STORAGE_ACCOUNT_KEY }}"
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -23,7 +32,7 @@ jobs:
       - name: Azure login
         uses: azure/login@v2
         with:
-            creds: '{"clientId":"${{ secrets.AZURE_CLIENT_ID }}","clientSecret":"${{ secrets.AZURE_AD_SECRET }}","subscriptionId":"${{ secrets.AZURE_SUBSCRIPTION_ID }}","tenantId":"${{ secrets.AZURE_TENANT_ID }}"}'
+            creds: '{"clientId":"${{ env.ARM_CLIENT_ID }}","clientSecret":"${{ env.ARM_CLIENT_SECRET }}","subscriptionId":"${{ env.ARM_SUBSCRIPTION_ID }}","tenantId":"${{ env.ARM_TENANT_ID }}"}'
 
       - name: Terraform install
         uses: hashicorp/setup-terraform@v3
@@ -38,5 +47,5 @@ jobs:
 
       - name: Terraform init
         run: |
-          terraform init
+          terraform init -backend-config=resource_group_name="${{env.TF_VAR_TFSTATE_RESOURCE_GROUP_NAME}}" -backend-config=storage_account_name="${{env.TF_VAR_TFSTATE_STORAGE_ACCOUNT_NAME}}" -backend-config=access_key="${{env.TF_VAR_TFSTATE_STORAGE_ACCOUNT_KEY}}" -backend-config=subscription_id="${{ env.ARM_SUBSCRIPTION_ID }}"
           
