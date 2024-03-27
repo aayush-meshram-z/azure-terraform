@@ -129,7 +129,7 @@ resource "azurerm_linux_virtual_machine" "linux_vm" {
   size                            = "Standard_F8"
   admin_username                  = "adminuser"
   admin_password                  = data.azurerm_key_vault_secret.vm_password.value
-  disable_password_authentication = true
+  disable_password_authentication = false
   network_interface_ids = [
     azurerm_network_interface.linux_nic.id,
   ]
