@@ -122,31 +122,31 @@ resource "azurerm_network_interface" "linux_nic" {
   }
 }
 
-resource "azurerm_linux_virtual_machine" "linux_vm" {
-  name                = "vm-linux-01"
-  resource_group_name = azurerm_resource_group.rg.name
-  location            = azurerm_resource_group.rg.location
-  size                = "Standard_F8"
-  admin_username      = "adminuser"
-  admin_password      = data.azurerm_key_vault_secret.vm_password.value
-  network_interface_ids = [
-    azurerm_network_interface.linux_nic.id,
-  ]
+# resource "azurerm_linux_virtual_machine" "linux_vm" {
+#   name                = "vm-linux-01"
+#   resource_group_name = azurerm_resource_group.rg.name
+#   location            = azurerm_resource_group.rg.location
+#   size                = "Standard_F8"
+#   admin_username      = "adminuser"
+#   admin_password      = data.azurerm_key_vault_secret.vm_password.value
+#   network_interface_ids = [
+#     azurerm_network_interface.linux_nic.id,
+#   ]
 
-  # admin_password {
-  #   username   = "adminuser"
-  #   vm_password = data.azurerm_key_vault_secret.vm_password.value
-  # }
+#   # admin_password {
+#   #   username   = "adminuser"
+#   #   vm_password = data.azurerm_key_vault_secret.vm_password.value
+#   # }
 
-  os_disk {
-    caching              = "ReadWrite"
-    storage_account_type = "Standard_LRS"
-  }
+#   os_disk {
+#     caching              = "ReadWrite"
+#     storage_account_type = "Standard_LRS"
+#   }
 
-  source_image_reference {
-    publisher = "Canonical"
-    offer     = "0001-com-ubuntu-server-jammy"
-    sku       = "22_04-lts"
-    version   = "latest"
-  }
-}
+#   source_image_reference {
+#     publisher = "Canonical"
+#     offer     = "0001-com-ubuntu-server-jammy"
+#     sku       = "22_04-lts"
+#     version   = "latest"
+#   }
+# }
