@@ -123,12 +123,13 @@ resource "azurerm_network_interface" "linux_nic" {
 }
 
 resource "azurerm_linux_virtual_machine" "linux_vm" {
-  name                = "vm-linux-01"
-  resource_group_name = azurerm_resource_group.rg.name
-  location            = azurerm_resource_group.rg.location
-  size                = "Standard_F8"
-  admin_username      = "adminuser"
-  admin_password      = data.azurerm_key_vault_secret.vm_password.value
+  name                            = "vm-linux-01"
+  resource_group_name             = azurerm_resource_group.rg.name
+  location                        = azurerm_resource_group.rg.location
+  size                            = "Standard_F8"
+  admin_username                  = "adminuser"
+  admin_password                  = data.azurerm_key_vault_secret.vm_password.value
+  disable_password_authentication = true
   network_interface_ids = [
     azurerm_network_interface.linux_nic.id,
   ]
