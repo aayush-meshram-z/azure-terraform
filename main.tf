@@ -102,8 +102,8 @@ resource "azurerm_windows_virtual_machine" "vm" {
 
   source_image_reference {
     publisher = "MicrosoftWindowsDesktop"
-    offer     = "Windows-11"
-    sku       = "22h2-pro"
+    offer     = "windows-11"
+    sku       = "win11-22h2-pro"
     version   = "latest"
   }
 }
